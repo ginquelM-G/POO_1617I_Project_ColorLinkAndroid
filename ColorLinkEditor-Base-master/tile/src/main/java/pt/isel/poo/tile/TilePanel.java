@@ -123,7 +123,7 @@ public class TilePanel extends View {
 	 */
 	public void setTile(int x, int y, Tile t) {
 		setTileNoInvalidate(x,y,t);
-	//	invalidate(x, y);
+		invalidate(x, y);
 	}
 
     // Transforms 2D coordinates in 1D coordinate

@@ -2,29 +2,21 @@ package pt.isel.poo.colorlink.editor;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Toast;
+import android.os.Bundle;
+import android.view.*;
+import android.widget.*;
 
-import java.io.FileNotFoundException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 
 import pt.isel.poo.colorlink.R;
-import pt.isel.poo.tile.OnTileTouchListener;
 import pt.isel.poo.tile.TilePanel;
 
 /**
  * Activity that implements the ColorLink Game level editor
  */
-public class EditorActivity extends AppCompatActivity  implements OnTileTouchListener{
+public class EditorActivity extends AppCompatActivity {
     private PiecePicker piecePicker;        // Piece type selector.
     private RadioGroup colorSel, actionSel; // Selectors of color and action.
     private TilePanel grid;                 // Edit area.
@@ -42,12 +34,6 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
         initColorSelector();
         initActionSelector();
         grid = (TilePanel) findViewById(R.id.panel);
-        grid.setListener(this);
-//        grid.setSize(5,6);
-//        grid.setTile(1,4, new PieceView(this));
-        initGridToWithEmptyPiece();
-//        Log.v("EditorAc ", "size "+ grid.getHeightInTiles());
-
     }
 
     /**
@@ -136,7 +122,6 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
             }
         });
         colorSel.check(R.id.red);
-
     }
 
     /**
@@ -146,48 +131,5 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
     private void initActionSelector() {
         actionSel = (RadioGroup) findViewById(R.id.selectAction);
         actionSel.check(R.id.insert);
-    }
-
-    private void initGridToWithEmptyPiece(){
-//        for(int i=0; i < grid.getHeightInTiles(); i++ ) {
-//            for (int j = 0; j < grid.getWidthInTiles(); j++) {
-//            //   grid.setTile(i, j, new PieceView(this, 2));
-//            }
-//        }
-        Log.e("initGridToWithEmptyP", " end");
-    }
-
-
-    private boolean  fix = actionSel.getCheckedRadioButtonId() == R.id.fix;
-
-    @Override
-    public boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException {
-        Log.e("onClick-EditorActivity", "xTile = " +xTile + " yTile " +yTile);
-        grid.setTile(xTile, yTile, new PieceView(this, piecePicker.getSelected(),
-                                                    piecePicker.getColor(), fix ));
-//        grid.setTile(xTile, yTile, new PieceView(this));
-        //grid.setListener(null);
-        return false;
-    }
-
-    @Override
-    public boolean onDrag(int xFrom, int yFrom, int xTo, int yTo) {
-        final int empty = 2;
-        if(actionSel.getCheckedRadioButtonId() == R.id.move) {
-            grid.setTile(xFrom, yFrom, new PieceView(this, empty, piecePicker.getColor(), fix));
-            grid.setTile(xTo, yTo, new PieceView(this, piecePicker.getSelected(), piecePicker.getColor(), fix));
-        }
-
-        return false;
-    }
-
-    @Override
-    public void onDragEnd(int x, int y) {
-
-    }
-
-    @Override
-    public void onDragCancel() {
-
     }
 }
