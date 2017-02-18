@@ -113,8 +113,8 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
     @Override
     public boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException {
 
-        Log.e("x "+xTile, " y"+ yTile );
-        Log.e("Type ", "    "+modelGame.pieces[xTile][yTile].getype());
+//        Log.e("x "+xTile, " y"+ yTile );
+//        Log.e("Type ", "    "+modelGame.pieces[xTile][yTile].getype());
         grid.setTile(xTile, yTile, new EmptyPieceView(this, modelGame,
                 modelGame.pieces[yTile][xTile].getype(), modelGame.pieces[yTile][xTile].getColor(), true));
 //        grid.setTile(xTile, yTile, new EmptyPieceView(this, modelGame,
