@@ -1,0 +1,6 @@
+5 x 6
+C0d S0u C0u  C1d S1u C1u
+S0l B0  S0l+ C1d S1u C1r
+C0l I0u I0u  C0u C2d C2r
+C0d L0d S0u  C0d S2l S2r
+C0u C0u E    E   C2d C2l+

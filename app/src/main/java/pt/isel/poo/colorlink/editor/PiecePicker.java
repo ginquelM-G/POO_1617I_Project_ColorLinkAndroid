@@ -31,6 +31,10 @@ public class PiecePicker extends TilePanel {
     private final SelectPiece[] tiles;    // One tile for each piece type
     private int selectedIdx = -1;   // Index of selected tile (-1 if none)
 
+    /**
+     * OTHERS Stuff
+     */
+
     { // Constructors code block
         cols = getWidthInTiles();
         tiles = new SelectPiece[imgIds.length];
@@ -78,6 +82,7 @@ public class PiecePicker extends TilePanel {
     public int getColor() {
         return paint.getColor();
     }
+
 
     /**
      * Force repaint of selected piece
