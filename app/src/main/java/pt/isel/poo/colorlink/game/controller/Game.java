@@ -84,7 +84,9 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
         for(int i=0; i < modelGame.LINE  -1 ; i++) {
             for (int j = 0; j < modelGame.COL ; j++) {
                 System.gc();
-                grid.setTile(j, i, new EmptyPieceView(this, modelGame.pieces[i][j].getype() , modelGame.pieces[i][j].getColor()));
+                grid.setTile(j, i, new EmptyPieceView(this, i, j, false));
+//                grid.setTile(j, i, new EmptyPieceView());
+//                grid.setTile(j, i, new EmptyPieceView(this, i, j, false));
 //                grid.setTile(i, j, new EmptyPieceView(this, 'S' , 2));
             }
             System.gc();
@@ -115,10 +117,7 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
 
 //        Log.e("x "+xTile, " y"+ yTile );
 //        Log.e("Type ", "    "+modelGame.pieces[xTile][yTile].getype());
-        grid.setTile(xTile, yTile, new EmptyPieceView(this, modelGame,
-                modelGame.pieces[yTile][xTile].getype(), modelGame.pieces[yTile][xTile].getColor(), true));
-//        grid.setTile(xTile, yTile, new EmptyPieceView(this, modelGame,
-//                modelGame.pieces[yTile][xTile].getype(), modelGame.pieces[yTile][xTile].getColor(), true));
+        grid.setTile(xTile, yTile, new EmptyPieceView(this, yTile, xTile, true));
         return false;
     }
 

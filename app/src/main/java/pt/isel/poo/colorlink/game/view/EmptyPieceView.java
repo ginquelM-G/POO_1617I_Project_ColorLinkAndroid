@@ -14,24 +14,23 @@ import android.util.Log;
 import java.util.HashMap;
 
 import pt.isel.poo.colorlink.R;
-import pt.isel.poo.colorlink.game.model.Grid;
 import pt.isel.poo.colorlink.game.model.Piece;
 import pt.isel.poo.tile.Tile;
 
 import static pt.isel.poo.colorlink.game.controller.Game.modelGame;
 
 /**
- * Created by Moreira on 17/02/2017.
+ *  Created by Moreira on 17/02/2017.
  */
 
 //public class EmptyPieceView extends PieceView {
 public class EmptyPieceView implements Tile {
 
-    Bitmap img;
-    int color;
-    boolean rotate;
-    Grid model;
-    int lin, col;
+    private static Paint paintDot, paint;
+    private Bitmap img;
+    private int color;
+    private boolean rotate;
+    private int lin, col;
 
     /**
      * Images of each type of piece
@@ -53,44 +52,61 @@ public class EmptyPieceView implements Tile {
             map.put('I', R.drawable.invert);
             map.put('L', R.drawable.link);
             map.put('S', R.drawable.side);
+
+            paintDot = new Paint();
+            paintDot.setColor(Color.WHITE);
+
+            paint = new Paint();
+            paint.setColor(colors[color]);
+            paint.setStrokeWidth(5);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+
         }
     }
 
-    public EmptyPieceView(Context ctx, Grid model, char type, int color, boolean rotate){
-        this(ctx, type, color);
-        this.rotate =rotate;
 
-    }
 
-    public EmptyPieceView(Context ctx, char type, int color){
+    public EmptyPieceView(){}
+    public EmptyPieceView(Context ctx,  int lin, int col, boolean rotate){
+//        this(ctx, modelGame.pieces[lin][col].getype(), modelGame.pieces[lin][col].getColor());
         init();
-        this.color = color;
+        this.lin = lin;
+        this.col = col;
+        this.rotate = rotate;
+        this.color = modelGame.pieces[lin][col].getColor();
+//        paint.setColor(colors[color]);
+
         Resources res=null;
         if(ctx != null)
             res = ctx.getResources();
+        char type = modelGame.pieces[lin][col].getype();
         img =  BitmapFactory.decodeResource(res, map.get(type));
-//        img =  BitmapFactory.decodeResource(res, imgIds[map.get(type)]);
-//        img = (pieces.getImage() == null)? BitmapFactory.decodeResource(res, imgIds[p.getIdxImage()]): p.getImage();
+//
+//        Log.e("Const EmptyPieceView()", " lin "+lin + " col "+ col);
+//        Log.e("EmptyPieceView()", " img " +img.toString());
     }
+
 
     @Override
     public void draw(Canvas canvas, int side) {
         Log.e("EmptyPieceView  draw()", "Begin");
+        Log.v("EmptyPieceView-> draw()", " lin "+lin + " col "+ col);
         //super.draw(canvas, side);
-        Paint p = new Paint();
-        Paint paintDot = new Paint();
-        paintDot.setColor(Color.WHITE);
-//        p.setColor(pieces.getColor());
-        p.setColor(colors[color]);
-//        p.setColor(Color.RED);
-        p.setStrokeWidth(5);
-        p.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        canvas.drawRect(0, 0, side, side, p);
-        if(rotate) canvas.drawBitmap(rotateImg(img, modelGame.pieces[lin][col],true ), null, new Rect(0, 0, side, side), p);
-        else canvas.drawBitmap(rotateImg(img, modelGame.pieces[lin][col], false), null, new Rect(0, 0, side, side), p);
-
-//                canvas.drawBitmap(pieces.getImage(), null, new Rect(0, 0, side, side), p);
+        paint.setColor(colors[color]);
+        canvas.drawRect(0, 0, side, side, paint);
+        Piece p = modelGame.pieces[lin][col];
+        if(rotate && p.getype() != 'B' && !p.isBlocked() )
+            canvas.drawBitmap(rotateImg(img, modelGame.pieces[lin][col],true ), null, new Rect(0, 0, side, side), paint);
+        else{
+            canvas.drawBitmap(rotateImg(img, modelGame.pieces[lin][col], false), null, new Rect(0, 0, side, side), paint);
+            if(p.getype() != 'B' && !p.isBlocked()){ canvas.drawCircle(side/2, side/2, 5, paintDot);}
+            if(p.isBlocked()){
+                paint.setColor(Color.BLACK);
+                canvas.drawLine(side/3, side/2, side - side/3, side/2, paint);
+                canvas.drawLine(side/2, side/3, side/2, side - side/3, paint);
+            }
+        }
     }
 
     @Override
@@ -99,38 +115,24 @@ public class EmptyPieceView implements Tile {
     }
 
 
-    private Bitmap rotateImg(Bitmap img, Pieces p, boolean rotate){
-        if(rotate) {
-            int angle = calculateTheRotationAngle(p.getAngle());
-            p.setAngle(angle);
-
-            Matrix matrix = new Matrix();
-            matrix.postRotate(p.getAngle());
-
-            Bitmap rotateBitmap = Bitmap.createBitmap(img, 0, 0, img.getWidth(),
-                    img.getHeight(), matrix, true);
-
-            return rotateBitmap;
-        }
-
-        return img;
-    }
 
 
     private Bitmap rotateImg(Bitmap img, Piece p, boolean rotate){
 
         int angleAux =0;
         System.out.println("\n"+p.getype() + " --> "+p.getDir()+"\n");
-        switch (p.getDir()) {
-            case DOWN:
-                angleAux = 180;   p.setDir(Piece.Direction.DOWN);     break;
-            case LEFT:
-                angleAux = 90;  p.setDir(Piece.Direction.LEFT);     break;
-            case UP:
-                angleAux = 360; p.setDir(Piece.Direction.UP);       break;
-            case RIGHT:
-                angleAux = 270; p.setDir(Piece.Direction.RIGHT);    break;
-        }
+        if(p != null && p.getDir() !=  null)
+            switch ( p.getDir()) {
+                case DOWN:
+                    angleAux = 180;   p.setDir(Piece.Direction.DOWN);     break;
+                case LEFT:
+                    angleAux = 270;  p.setDir(Piece.Direction.LEFT);     break;
+                case UP:
+                    angleAux = 360; p.setDir(Piece.Direction.UP);       break;
+                case RIGHT:
+                    angleAux = 90; p.setDir(Piece.Direction.RIGHT);    break;
+                default: angleAux = 0;
+            }
 
         if(rotate) {
             angleAux = calculateTheRotationAngle(angleAux);
@@ -148,7 +150,6 @@ public class EmptyPieceView implements Tile {
                 img.getHeight(), matrix, true);
 
         return rotateBitmap;
-//        return img;
     }
 
 
