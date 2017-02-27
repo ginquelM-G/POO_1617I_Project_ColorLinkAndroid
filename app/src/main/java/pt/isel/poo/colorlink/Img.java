@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.SparseArray;
 
 /**
@@ -66,13 +67,19 @@ public class Img {
      * @param p Paint used to draw
      */
     public void draw(Canvas canvas, int width, int height, float angle, Paint p) {
+        Log.v("Img -->  draw()", "Begin");
         Bitmap bitmap = getBitMap(width,height);
-        if (bitmap==null) return;  // If it is loaded later asynchronously
+        if (bitmap==null){
+            Log.v("Img -->  draw() ", "Bitmap null");
+            return;  // If it is loaded later asynchronously
+        }
         m.reset();
         m.postScale((float)width/bitmap.getWidth(), (float)height/bitmap.getHeight());
         if (angle!=0)
             m.postRotate(angle,(float)width/2,(float)height/2);
         canvas.drawBitmap(bitmap, m, p);
+
+        Log.v("Img -->  draw()", "End");
     }
 
     /**
