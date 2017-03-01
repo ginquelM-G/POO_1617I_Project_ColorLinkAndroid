@@ -17,7 +17,7 @@ import java.util.Scanner;
 import pt.isel.poo.colorlink.R;
 import pt.isel.poo.colorlink.editor.PiecePicker;
 import pt.isel.poo.colorlink.game.model.Grid;
-import pt.isel.poo.colorlink.game.view.EmptyPieceView;
+import pt.isel.poo.colorlink.game.view.PieceView;
 import pt.isel.poo.tile.OnTileTouchListener;
 import pt.isel.poo.tile.TilePanel;
 
@@ -49,17 +49,17 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
         textViewTime =(TextView) findViewById(R.id.time);
 
         modelGame = new Grid();
-
         init();
         grid.setSize(modelGame.COL, modelGame.LINE);
         initGrid();
 
         startTime = System.nanoTime();
         timeUpdate();
-        Log.e("Line "+modelGame.LINE, " Col "+ modelGame.COL );
+        Log.e("Game OnCreate() Line "+modelGame.LINE, " Col "+ modelGame.COL );
     }
 
 
+    /** Chama o metodo para ler o ficheriro de Level1 */
     private void init(){
         AssetManager assetManager = getAssets();
         try {
@@ -67,21 +67,18 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
         }catch (IOException err){
             Log.e("Game: init() --> ERROR", err.getMessage());
         }
-//        if(!loadLevel("Level1")) return;
-        Log.e("init() " , "  end");
+        Log.v("init() " , "  end");
     }
 
+
     private void initGrid(){
-        Log.e("initGrid " , " Begin");
+        Log.v("Game --> initGrid " , " Begin");
         for(int i=0; i < modelGame.LINE ; i++) {
             for (int j = 0; j < modelGame.COL ; j++) {
-                System.gc();
-
-                grid.setTile(j, i, new EmptyPieceView(this, i, j));
+                grid.setTile(j, i, new PieceView(this, i, j));
+//                grid.setTile(j, i, new PieceView(this, i, j, false));
 //                  grid.setTile(j, i, new EmptyPieceView(this, i, j, false));
-//
             }
-            System.gc();
         }
     }
 
@@ -94,9 +91,8 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
             modelGame.load(level);
             level.close();
 
-            System.out.println("Read Complete!!!");
+            System.out.println("Read file is Completed!!!");
             return true;
-
         }
         catch (FileNotFoundException | InputMismatchException e){
             System.out.println("Error loading file "+e.getMessage());
@@ -143,12 +139,15 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
     public boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException {
 //        Log.e("x "+xTile, " y"+ yTile );
 //        Log.e("Type ", "    "+modelGame.pieces[xTile][yTile].getype());
-        grid.setTile(xTile, yTile, new EmptyPieceView(this, yTile, xTile, true));
+        grid.setTile(xTile, yTile, new PieceView(this, yTile, xTile, true));
         return false;
     }
 
     @Override
     public boolean onDrag(int xFrom, int yFrom, int xTo, int yTo) {
+//        PieceView pv = new PieceView(this, yFrom, xFrom, false);
+//        PieceView pv1 = (PieceView) grid.getTile(xFrom, yFrom);
+//        grid.setTile(xFrom, yFrom, pv1 );
         return false;
     }
 

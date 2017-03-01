@@ -16,10 +16,21 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 import pt.isel.poo.colorlink.R;
+import pt.isel.poo.colorlink.game.model.Block;
+import pt.isel.poo.colorlink.game.model.Corner;
+import pt.isel.poo.colorlink.game.model.Empty;
+import pt.isel.poo.colorlink.game.model.Grid;
+import pt.isel.poo.colorlink.game.model.Invert;
+import pt.isel.poo.colorlink.game.model.Link;
+import pt.isel.poo.colorlink.game.model.Piece;
+import pt.isel.poo.colorlink.game.model.Side;
 import pt.isel.poo.tile.OnTileTouchListener;
 import pt.isel.poo.tile.TilePanel;
+
+import static pt.isel.poo.colorlink.editor.EditorModel.piecesEd;
 
 /**
  * Activity that implements the ColorLink Game level editor
@@ -29,6 +40,7 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
     private RadioGroup colorSel, actionSel; // Selectors of color and action.
     private TilePanel grid;                 // Edit area.
 
+    public static Grid modelEditor;
     public EditorView pp;
     public static EditorModel model;
     public boolean makeAMove;
@@ -50,12 +62,13 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
         grid = (TilePanel) findViewById(R.id.panel);
         grid.setListener(this);
 
+        modelEditor = new Grid();
 
         model = new EditorModel(grid.getHeightInTiles(), grid.getWidthInTiles());
 
-//        model.pieces[][] = new Pieces()
-//        model.setPieces(model.pieces,1,1, new Pieces());
-
+        init();
+//        model.pieceEditor[][] = new PieceEditor()
+//        model.setPieces(model.pieceEditor,1,1, new PieceEditor());
 //        grid.setSize(5,6);
 //        grid.setTile(1,4, new EditorView(this));
         initGridToWithEmptyPiece();
@@ -136,7 +149,7 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
 
     /**
      * Starts the color picker.<br/>
-     * The colors of the pieces displayed in selector change according to the chosen color.
+     * The colors of the pieceEditor displayed in selector change according to the chosen color.
      */
     private void initColorSelector() {
         colorSel = (RadioGroup) findViewById(R.id.selectColor);
@@ -167,14 +180,13 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
         int line = grid.getHeightInTiles();
         int col = grid.getWidthInTiles();
 
-        EditorView p =  new EditorView(this, emptyIdx, piecePicker.getColor(), true, false, false, false);
+        EditorView p =  new EditorView(this, emptyIdx, true, false, false, false);
 
         for(int i=0; i < line; i++ ) {
             for (int j = 0; j < col; j++) {
                 grid.setTile(i, j, p);
             }
         }
-        p.emptyImgage = null;
         Log.e("initGridToWithEmptyP", " end");
 
     }
@@ -186,66 +198,98 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
 
     @Override
     public boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException {
-      //  fix = (actionSel!= null)?actionSel.getCheckedRadioButtonId() == R.id.fix:false;
         Log.e("onClick-EditorActivity", "xTile = " +xTile + " yTile " +yTile);
         int checkedRadioButtonId = actionSel.getCheckedRadioButtonId();
 
+
         if(checkedRadioButtonId == R.id.insert ) {
-            model.pieces[xTile][yTile] = new Pieces(piecePicker.getSelected(), piecePicker.getColor());
-         //   grid.setTile(xTile, yTile, new EditorView(this, model.pieces[xTile][yTile] , fix, false));
+            insert(yTile, xTile); // lin col
         }
         else if(checkedRadioButtonId == R.id.rotate) {
-            System.out.println("\n\nEditorActivity --> OnClick: rotateIsChecked\n\n" );
-            if(model.pieces[xTile][yTile] != null){
-                Log.e("pieces[xTile][yTile]", "!= null");
-                EditorView ev = new EditorView(this, model.pieces[xTile][yTile] , fix, true);
-                grid.setTile(xTile, yTile, ev);
-                model.pieces[xTile][yTile].setImage(ev.imageAfterRotate);
-            }else{
-                actionSel.check(R.id.insert);
-                model.pieces[xTile][yTile] = new Pieces(piecePicker.getSelected(), piecePicker.getColor());
-                grid.setTile(xTile, yTile, new EditorView(this, model.pieces[xTile][yTile] , fix, false));
-            }
+
+            rotate(yTile, xTile);
         }
         else if(checkedRadioButtonId == R.id.move){
-            if(makeAMove){
-                if(model.pieces[xFromOnClick][yFromOnClick] != null ){
-                    final int emptyIdx = 2;
-                    model.pieces[xTile][yTile] = model.pieces[xFromOnClick][yFromOnClick];
-                    model.pieces[xFromOnClick][yFromOnClick] =  null;
-
-//                    grid.setTile(xFromOnClick, yFromOnClick, new EditorView(this, emptyIdx, piecePicker.getColor(), fix, false, true));
-                    grid.setTile(xFromOnClick, yFromOnClick, new EditorView(this, emptyIdx, piecePicker.getColor(), false, false, true, false));
-                    grid.setTile(xTile, yTile, new EditorView(this, model.pieces[xTile][yTile], fix, false));
-                }
-
-                else if(model.pieces[xTile][yTile] != null) {
-                    final int emptyIdx = 2;
-                    model.pieces[xFromOnClick][yFromOnClick] =  model.pieces[xTile][yTile];
-                    model.pieces[xTile][yTile] = null;
-
-                    grid.setTile(xTile, yTile, new EditorView(this, emptyIdx, piecePicker.getColor(), false, false, true, false));
-                    grid.setTile(xFromOnClick, yFromOnClick, new EditorView(this, model.pieces[xFromOnClick][yFromOnClick], fix, false));
-                }
-                makeAMove = false;
-            }
-            else{
-                xFromOnClick = xTile;
-                yFromOnClick = yTile;
-                makeAMove = true;
-            }
-
+            move(yTile, xTile);
         }
-        else if(checkedRadioButtonId == R.id.fix) {
-            if (model.pieces[xTile][yTile] != null) {
-                Log.e("pieces[xTile][yTile]", "!= null");
-                grid.setTile(xTile, yTile, new EditorView(this, model.pieces[xTile][yTile], true, false));
-            }
-        }
+        else if(checkedRadioButtonId == R.id.fix) { fix(yTile, xTile);}
+
+        if(makeAMove && checkedRadioButtonId != R.id.move ) makeAMove =false;
 
 //        grid.setListener(null);
-        showTiles(model.pieces);
-        return true;
+        showTiles(piecesEd);
+        return false;
+    }
+
+    public void insert(int xTile, int yTile){
+        Log.i("onClick()", "insert");
+        Piece piece = mapIdxImgType.get(piecePicker.getSelected());
+        PieceEditor p = new PieceEditor(piece, piecePicker.getSelected(), piecePicker.getColor());
+        piecesEd[xTile][yTile] = p;
+        grid.setTile(yTile, xTile, new EditorView(this, p, xTile, yTile, true, false, false, false)); //trocar a ordem de x e y
+    }
+    public void rotate(int xTile, int yTile){
+        Log.i("onClick()", "rotate");
+        if(piecesEd[xTile][yTile] != null){
+            PieceEditor p = piecesEd[xTile][yTile];
+            System.out.println("\t>>>>>>>>>>>>>> \n\nEditorActivity: rotate() --> type = "
+                    + p.getPiece().getype()+ " p.getAngle "+p.getAngle() + "<<<<<<<<<<<<<<<<<<<<<<<");
+//            grid.setTile(xTile, yTile, new EditorView(this, p.getIdxImage(), p.getColor(), false, true, false, false));
+            grid.setTile(yTile, xTile, new EditorView(this, p, xTile, yTile, false, true, false, false));
+//            EditorView ev = (EditorView) grid.getTile(xTile,yTile);
+//            grid.setTile(xTile, yTile, ev);
+        }else{
+            actionSel.check(R.id.insert);
+            insert(xTile, yTile);
+//            Piece piece = mapIdxImgType.get(piecePicker.getSelected());
+//            PieceEditor p = new PieceEditor(piece, piecePicker.getSelected(), piecePicker.getColor());
+//            piecesEd[xTile][yTile] = p;
+//            grid.setTile(xTile, yTile, new EditorView(this, p.getIdxImage(),  true, false, false, false));
+        }
+    }
+    public void move(int xTile, int yTile){
+        if(makeAMove) {
+            Log.v("->>> onClick makeAmove", "MOVE");
+            if(piecesEd[xFromOnClick][yFromOnClick] != null || piecesEd[xTile][yTile] != null ){
+                if(piecesEd[xFromOnClick][yFromOnClick] != null && piecesEd[xTile][yTile] != null){
+                    PieceEditor aux = piecesEd[xTile][yTile];
+                    piecesEd[xTile][yTile] = piecesEd[xFromOnClick][yFromOnClick];
+                    piecesEd[xFromOnClick][yFromOnClick] = aux;
+                }
+                else if (piecesEd[xFromOnClick][yFromOnClick] != null) {
+                    piecesEd[xTile][yTile] = piecesEd[xFromOnClick][yFromOnClick];
+                    piecesEd[xFromOnClick][yFromOnClick] = null;
+                }else{ //if (pieces[xTile][yTile] != null) {
+                    piecesEd[xFromOnClick][yFromOnClick] = piecesEd[xTile][yTile];
+                    piecesEd[xTile][yTile] = null;
+                }
+                EditorView aux = (EditorView) grid.getTile(yFromOnClick, xFromOnClick);
+                grid.setTile(yFromOnClick, xFromOnClick,  grid.getTile(yTile, xTile)); // move para nova posicao
+                grid.setTile(yTile, xTile, aux); // limpa a antiga posicao
+//                grid.setTile(xFromOnClick, yFromOnClick, grid.getTile(xTile, yTile)); // move para nova posicao
+//                grid.setTile(xTile, yTile, aux); // limpa a antiga posicao
+            }
+            makeAMove = false;
+        }
+        else{
+            xFromOnClick = xTile;
+            yFromOnClick = yTile;
+            makeAMove = true;
+        }
+    }
+    public void fix(int xTile, int yTile){
+        PieceEditor pe = piecesEd[xTile][yTile];
+        if (pe != null) {
+            Log.e("EA-checkedRadioButtonId", "R.id.fix");
+//          grid.setTile(xTile, yTile, new EditorView(this, piecePicker.getSelected(), piecePicker.getColor(), false, false, false, true));
+//           grid.setTile(xTile, yTile, new EditorView(this, model.pieceEditor[xTile][yTile], true, false));
+            grid.setTile(yTile, xTile, new EditorView(this, pe, xTile, yTile, false, false, false, true));
+        }
+
+//        Piece piece = mapIdxImgType.get(piecePicker.getSelected());
+//        PieceEditor p = new PieceEditor(piece, piecePicker.getSelected(), piecePicker.getColor());
+//        piecesEd[xTile][yTile] = p;
+
     }
 
     @Override
@@ -282,15 +326,61 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
 
     }
 
-    public void showTiles(Pieces [][] p){
+    public void showTiles(PieceEditor [][] p){
         for (int i=0; i < 6; i++) {
             for (int j = 0; j < 6; j++){
-                if(p[j][i] != null){
+                if(p[i][j] != null){
                     System.out.print(" ## ");
                 }
                 else System.out.print(" __ ");
             }
             System.out.println();
         }
+    }
+
+
+    public static HashMap<Integer, Character> mapImgType;
+    public static HashMap<Integer, Piece> mapIdxImgType;
+    public static HashMap<Piece, Integer> mapPieceIdxImg;
+
+
+    public void init() {
+        if (mapIdxImgType == null) {
+            mapIdxImgType = new HashMap<>();
+            mapIdxImgType.put(0, new Block());
+            mapIdxImgType.put(1, new Corner());
+            mapIdxImgType.put(2, new Empty());
+            mapIdxImgType.put(3, new Invert());
+            mapIdxImgType.put(4, new Link());
+            mapIdxImgType.put(5, new Side());
+        }
+        if (mapIdxImgType == null) {
+            mapPieceIdxImg = new HashMap<>();
+            mapPieceIdxImg.put(new Block(), 0);
+            mapPieceIdxImg.put(new Corner(), 1);
+            mapPieceIdxImg.put(new Empty(), 2);
+            mapPieceIdxImg.put(new Invert(), 3);
+            mapPieceIdxImg.put(new Link(), 4);
+            mapPieceIdxImg.put(new Side(), 5);
+        }
+
+        if (mapImgType == null) {
+            mapImgType = new HashMap<>();
+            mapImgType.put(0, 'B');
+            mapImgType.put(1, 'C');
+            mapImgType.put(2, 'E');
+            mapImgType.put(3, 'I');
+            mapImgType.put(4, 'L');
+            mapImgType.put(5, 'S');
+        }
+//        if (mapImgType == null) {
+//            mapImgType = new HashMap<>();
+//            mapImgType.put(R.drawable.block, 'B');
+//            mapImgType.put(R.drawable.corner, 'C');
+//            mapImgType.put(R.drawable.empty, 'E');
+//            mapImgType.put(R.drawable.invert, 'I');
+//            mapImgType.put(R.drawable.link, 'L');
+//            mapImgType.put(R.drawable.side, 'S');
+//        }
     }
 }

@@ -67,7 +67,7 @@ public class PiecePicker extends TilePanel {
     public int getMaxSelected() { return tiles.length; };
 
     /**
-     * Changes the color of all pieces
+     * Changes the color of all pieceEditor
      * @param color The new color
      */
     public void setColor(int color) {
@@ -76,7 +76,7 @@ public class PiecePicker extends TilePanel {
     }
 
     /**
-     * Return the color of all pieces.
+     * Return the color of all pieceEditor.
      * @return The current color
      */
     public int getColor() {
@@ -92,7 +92,7 @@ public class PiecePicker extends TilePanel {
             invalidate(selectedIdx%cols,selectedIdx/cols);
     }
 
-    private Paint paint = new Paint(); // Used to draw pieces picture
+    private Paint paint = new Paint(); // Used to draw pieceEditor picture
     private Paint pSel = new Paint();  // Used to paint the border of selected piece
     { // Constructors code block
         paint.setColor(Color.YELLOW);
