@@ -130,7 +130,7 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
                     public void onClick(DialogInterface dialogInterface, int i) {
                         LINE_ED  = Integer.parseInt(line.getText().toString());
                         COL_ED = Integer.parseInt(col.getText().toString());
-                        grid.setSize(LINE_ED, COL_ED);
+                        grid.setSize(COL_ED, LINE_ED);
                         model = new EditorModel(LINE_ED, COL_ED);
                         initGridToWithEmptyPiece();
                     }
