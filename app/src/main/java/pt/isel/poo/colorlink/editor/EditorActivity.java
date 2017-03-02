@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -41,10 +43,10 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
     private TilePanel grid;                 // Edit area.
 
     public static Grid modelEditor;
-    public EditorView pp;
     public static EditorModel model;
     public boolean makeAMove;
     int xFromOnClick, yFromOnClick;
+    static int LINE_ED, COL_ED;
 
 
     /**
@@ -62,15 +64,13 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
         grid = (TilePanel) findViewById(R.id.panel);
         grid.setListener(this);
 
-        modelEditor = new Grid();
+//        modelEditor = new Grid();
 
-        model = new EditorModel(grid.getHeightInTiles(), grid.getWidthInTiles());
+        LINE_ED = grid.getHeightInTiles();
+        COL_ED = grid.getWidthInTiles();
+        model = new EditorModel(LINE_ED, COL_ED);
 
         init();
-//        model.pieceEditor[][] = new PieceEditor()
-//        model.setPieces(model.pieceEditor,1,1, new PieceEditor());
-//        grid.setSize(5,6);
-//        grid.setTile(1,4, new EditorView(this));
         initGridToWithEmptyPiece();
         Log.e("EditorAc ", "size "+ grid.getHeightInTiles());
 
@@ -100,9 +100,43 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
                 save();
                 return true;
             //case R.id.load: load(); return true;
-            //case R.id.create: create(); return true;
+            case R.id.create: create(); return true;
         }
         return false;
+    }
+
+    /**
+     * Opens a dialog window to ask for the name of the file to be saved.<br/>
+     * The "save" button starts saving.<br/>
+     * The "cancel" button aborts the operation.
+     */
+    private void create() {
+        Log.e("EditorActivity create()", " Nova Grelha");
+
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        final LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_novagrelha, null);
+
+//        new AlertDialog.Builder(this)
+        dialogBuilder
+                .setTitle(R.string.nova_grelha)
+                .setView(dialogView)
+                .setMessage("Numero de linhas e colunas")
+                .setIcon(android.R.drawable.ic_menu_add)
+                .setPositiveButton(R.string.nova_grelha, new DialogInterface.OnClickListener() {
+                    final EditText line = (EditText) dialogView.findViewById(R.id.line);
+                    final EditText col =  (EditText) dialogView.findViewById(R.id.col);
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        LINE_ED  = Integer.parseInt(line.getText().toString());
+                        COL_ED = Integer.parseInt(col.getText().toString());
+                        grid.setSize(LINE_ED, COL_ED);
+                        model = new EditorModel(LINE_ED, COL_ED);
+                        initGridToWithEmptyPiece();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     // Last name of file used in save dialog.
@@ -176,48 +210,29 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
 
     private void initGridToWithEmptyPiece(){
         final int emptyIdx = 2;
-        Log.e("initGridToWithEmptyP", "grid.getWidthInTiles() "+ grid.getWidthInTiles());
-        int line = grid.getHeightInTiles();
-        int col = grid.getWidthInTiles();
-
         EditorView p =  new EditorView(this, emptyIdx, true, false, false, false);
 
-        for(int i=0; i < line; i++ ) {
-            for (int j = 0; j < col; j++) {
+        for(int i=0; i < LINE_ED; i++ ) {
+            for (int j = 0; j < COL_ED; j++) {
                 grid.setTile(i, j, p);
             }
         }
-        Log.e("initGridToWithEmptyP", " end");
-
     }
-
-
-    private boolean  fix =false;
 
 
 
     @Override
-    public boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException {
-        Log.e("onClick-EditorActivity", "xTile = " +xTile + " yTile " +yTile);
+    public boolean onClick(int xTile, int yTile) {
         int checkedRadioButtonId = actionSel.getCheckedRadioButtonId();
 
-
-        if(checkedRadioButtonId == R.id.insert ) {
-            insert(yTile, xTile); // lin col
-        }
-        else if(checkedRadioButtonId == R.id.rotate) {
-
-            rotate(yTile, xTile);
-        }
-        else if(checkedRadioButtonId == R.id.move){
-            move(yTile, xTile);
-        }
+        if(checkedRadioButtonId == R.id.insert ) {insert(yTile, xTile);} // lin col  }
+        else if(checkedRadioButtonId == R.id.rotate) {rotate(yTile, xTile); }
+        else if(checkedRadioButtonId == R.id.move){ move(yTile, xTile);  }
         else if(checkedRadioButtonId == R.id.fix) { fix(yTile, xTile);}
 
         if(makeAMove && checkedRadioButtonId != R.id.move ) makeAMove =false;
-
-//        grid.setListener(null);
         showTiles(piecesEd);
+//        grid.setListener(null);
         return false;
     }
 
@@ -225,31 +240,24 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
         Log.i("onClick()", "insert");
         Piece piece = mapIdxImgType.get(piecePicker.getSelected());
         PieceEditor p = new PieceEditor(piece, piecePicker.getSelected(), piecePicker.getColor());
-        piecesEd[xTile][yTile] = p;
+        model.piecesEd[xTile][yTile] = p;
+//        model.setPiece(xTile, yTile,piecePicker.getSelected(), true);
         grid.setTile(yTile, xTile, new EditorView(this, p, xTile, yTile, true, false, false, false)); //trocar a ordem de x e y
     }
+
     public void rotate(int xTile, int yTile){
         Log.i("onClick()", "rotate");
         if(piecesEd[xTile][yTile] != null){
             PieceEditor p = piecesEd[xTile][yTile];
-            System.out.println("\t>>>>>>>>>>>>>> \n\nEditorActivity: rotate() --> type = "
-                    + p.getPiece().getype()+ " p.getAngle "+p.getAngle() + "<<<<<<<<<<<<<<<<<<<<<<<");
-//            grid.setTile(xTile, yTile, new EditorView(this, p.getIdxImage(), p.getColor(), false, true, false, false));
             grid.setTile(yTile, xTile, new EditorView(this, p, xTile, yTile, false, true, false, false));
-//            EditorView ev = (EditorView) grid.getTile(xTile,yTile);
-//            grid.setTile(xTile, yTile, ev);
         }else{
             actionSel.check(R.id.insert);
             insert(xTile, yTile);
-//            Piece piece = mapIdxImgType.get(piecePicker.getSelected());
-//            PieceEditor p = new PieceEditor(piece, piecePicker.getSelected(), piecePicker.getColor());
-//            piecesEd[xTile][yTile] = p;
-//            grid.setTile(xTile, yTile, new EditorView(this, p.getIdxImage(),  true, false, false, false));
         }
     }
-    public void move(int xTile, int yTile){
+
+    private void move(int xTile, int yTile){
         if(makeAMove) {
-            Log.v("->>> onClick makeAmove", "MOVE");
             if(piecesEd[xFromOnClick][yFromOnClick] != null || piecesEd[xTile][yTile] != null ){
                 if(piecesEd[xFromOnClick][yFromOnClick] != null && piecesEd[xTile][yTile] != null){
                     PieceEditor aux = piecesEd[xTile][yTile];
@@ -277,7 +285,8 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
             makeAMove = true;
         }
     }
-    public void fix(int xTile, int yTile){
+
+    private void fix(int xTile, int yTile){
         PieceEditor pe = piecesEd[xTile][yTile];
         if (pe != null) {
             Log.e("EA-checkedRadioButtonId", "R.id.fix");
@@ -326,9 +335,9 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
 
     }
 
-    public void showTiles(PieceEditor [][] p){
-        for (int i=0; i < 6; i++) {
-            for (int j = 0; j < 6; j++){
+    private void showTiles(PieceEditor [][] p){
+        for (int i=0; i < model.getLINE(); i++) {
+            for (int j = 0; j < model.getCOL(); j++){
                 if(p[i][j] != null){
                     System.out.print(" ## ");
                 }
@@ -373,14 +382,5 @@ public class EditorActivity extends AppCompatActivity  implements OnTileTouchLis
             mapImgType.put(4, 'L');
             mapImgType.put(5, 'S');
         }
-//        if (mapImgType == null) {
-//            mapImgType = new HashMap<>();
-//            mapImgType.put(R.drawable.block, 'B');
-//            mapImgType.put(R.drawable.corner, 'C');
-//            mapImgType.put(R.drawable.empty, 'E');
-//            mapImgType.put(R.drawable.invert, 'I');
-//            mapImgType.put(R.drawable.link, 'L');
-//            mapImgType.put(R.drawable.side, 'S');
-//        }
     }
 }

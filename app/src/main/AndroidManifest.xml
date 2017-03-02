@@ -12,16 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-
-        <activity android:name="pt.isel.poo.colorlink.game.controller.Game"
-            android:label="@string/app_name"
-            android:taskAffinity="pt.isel.poo.colorlink.game.controller.Game">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
         <activity android:name="pt.isel.poo.colorlink.editor.EditorActivity"
             android:label="@string/title_editor"
             android:taskAffinity="pt.isel.poo.colorlink.editor.EditorActivity">
@@ -30,6 +20,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="pt.isel.poo.colorlink.game.controller.Game"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name"
+            android:taskAffinity="pt.isel.poo.colorlink.game.controller.Game">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+
+
+
+
 
     </application>
 

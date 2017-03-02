@@ -113,14 +113,16 @@
         />
 
     <TextView
-        android:text=""
+        android:configChanges="orientation|screenSize"
+        android:text="Toque para iniciar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_marginTop="10sp"
         android:layout_marginRight="2sp"
         android:background="@color/colorPrimary"
         android:textColor="@color/colorWhite"
-        android:textSize="25sp"
+        android:textSize="20sp"
         android:id="@+id/time" />
    <!-- #3F51B5
     android:textColor="@color/color2"-->

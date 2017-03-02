@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 
 import java.util.HashMap;
 
@@ -24,16 +23,13 @@ import static pt.isel.poo.colorlink.editor.EditorModel.piecesEd;
 
 public class EditorView implements Tile, Img.Updater {
 
-    private Bitmap bitmap;
+    public Bitmap bitmap;
     private Img img;
     public int color ;
     public int idx;
     public int lin;
     public int col;
     private boolean insert, rotate, move, fix;
-    boolean reWrite =false;
-    public int angleRotation = 0;
-    public boolean isSelected;
     PieceEditor pieceEditor;
     Piece piece;
     Paint paintDot;
@@ -49,7 +45,6 @@ public class EditorView implements Tile, Img.Updater {
             R.drawable.invert, R.drawable.link, R.drawable.side
     };
 
-    public static HashMap<Character, Integer> mapTypeImg;
     public static HashMap<Integer, Character> mapImgType;
 
 
@@ -91,23 +86,6 @@ public class EditorView implements Tile, Img.Updater {
         }
     }
 
-
-    public EditorView(Context ctx, int idxImg, int color, boolean rotate, boolean fix) {
-        this.color = color;
-        this.fix = fix;
-        this.rotate = rotate;
-
-        Resources res=null;
-        if(ctx != null)
-            res = ctx.getResources();
-//        bitmap = (pieceEditor.getImage() == null)? BitmapFactory.decodeResource(res, imgIds[p.]): p.getImage();
-        Log.v("imgIds[idxImg] ", " id "+ idxImg + "->" +imgIds[idxImg]);
-        bitmap =  BitmapFactory.decodeResource(res, imgIds[idxImg]);
-        img = new Img(ctx, imgIds[idxImg] , this);
-    }
-
-
-
     public EditorView(Context ctx, int idx, boolean insert, boolean rotate, boolean move, boolean fix) {
 //      super(ctx);
         init();
@@ -123,8 +101,6 @@ public class EditorView implements Tile, Img.Updater {
 
         bitmap = BitmapFactory.decodeResource(res, imgIds[idx]);
         img = new Img(ctx, imgIds[idx] , this);
-        reWrite = true;
-        Log.e("EditorView Const()", "End");
     }
 
     public EditorView(Context ctx, PieceEditor pieceEditor, int lin, int col, boolean insert, boolean rotate, boolean move, boolean fix) {
@@ -145,19 +121,12 @@ public class EditorView implements Tile, Img.Updater {
 
         bitmap = BitmapFactory.decodeResource(res, imgIds[idx]);
         img = new Img(ctx, imgIds[idx], this);
-        reWrite = true;
-        Log.v("EditorView Constr()", "DIR-> "+ pieceEditor.getPiece().getDir());
-        Log.e("EditorView Const()", "End");
     }
-
 
 
 
     @Override
     public void draw(Canvas canvas, int side) {
-        Log.e("EditorViewNew  draw()", "->->-> Inicio");
-        Log.v("EditorView -> draw() " , " insert = "+ insert + " rotate="+rotate+ " move= "+move+" fix= "+fix);
-
         p.setColor(color);
         if(pieceEditor != null && pieceEditor.getIdxImage() != 0) {
             canvas.drawCircle(side / 2, side / 2, 5, paintDot);
@@ -168,50 +137,37 @@ public class EditorView implements Tile, Img.Updater {
         rotate = false;
         pieceEditor = null;
     }
-//
 
     @Override
     public boolean setSelect(boolean selected) {
-        this.isSelected = selected;
-        return isSelected;
-//        return true;
+        return true;
     }
 
-
+    /** Desenha uma nova 'Piece' na Tile */
     public void drawInsertSelected(Canvas canvas, int side, Paint p){
-        Log.v("EditorView -> draw() " , " insert = "+ insert + " lin "+lin+ " col "+col);
-        if(reWrite) {
             canvas.drawRect(0, 0, side, side, p);
             img.draw(canvas, side, side, p);
-            reWrite = false;
-        }
 //      canvas.drawBitmap(bitmap, null, new Rect(0, 0, side, side), p);
     }
 
 
+    /** Este metodo roda a 'Piece' selecionado' */
     public void drawWithRotateSelected(Canvas canvas, int side, Paint p){
-        Log.e(" EditorView -->", "drawWithRotateSelected()");
         canvas.drawRect(0, 0, side, side, p);
-
         if(piecesEd[lin][col] != null){
-            Log.v(" EditorView -->", " piecesEd[lin][col] " + piecesEd[lin][col].toString());
             if(piecesEd[lin][col].getPiece() != null) {
-                Log.v(" EditorView -->", " piecesEd[lin][col].getPiece() " + piecesEd[lin][col].getPiece());
-//              updateAngle(piecesEd[lin][col].getPiece(), true);
                 updateAngle(piecesEd[lin][col].getPiece(), true);
-                if(img != null)
-                    img.draw(canvas, side, side, piecesEd[lin][col].getAngle(), p);
+                if(img != null) img.draw(canvas, side, side, piecesEd[lin][col].getAngle(), p);
             }
         }
         rotate = false;
-        insert = false;
+//        insert = false;
     }
 
     public void drawMoveSelected(){}
 
-
+    /** Este metodo sinaliza  a 'Piece' selecionado' como fixada (+) */
     public void drawWithFixSelected(Canvas canvas, int side, Paint p){
-        Log.v("EditorView->drawWithFix" , " fix "+ fix);
         canvas.drawRect(0, 0, side, side, p);
         int colorSave = p.getColor();
         p.setColor(Color.BLACK);
@@ -248,8 +204,6 @@ public class EditorView implements Tile, Img.Updater {
 
     private int updateAngle(Piece p, boolean rotate) {
         int angleAux = currentAngleOfPiece(p);
-        System.out.println("\nupdateAngle(): " + p.getype() + " --> " + p.getDir() + "\n ");
-
         if (rotate) {
             angleAux = calculateTheRotationAngle(angleAux);
             switch (p.getDir()) {
@@ -268,9 +222,6 @@ public class EditorView implements Tile, Img.Updater {
     public int calculateTheRotationAngle(int angleRotation){
         if( angleRotation == 360 ) angleRotation = 90;
         else angleRotation += 90;
-//            this.angleRotation = angleRotation;
-
-        System.out.println("calculateTheRotationAngle return angle = "+angleRotation);
         return angleRotation;
     }
 

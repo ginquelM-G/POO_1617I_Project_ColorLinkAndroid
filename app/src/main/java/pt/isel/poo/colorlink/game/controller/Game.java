@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import java.io.FileNotFoundException;
@@ -15,52 +14,57 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import pt.isel.poo.colorlink.R;
-import pt.isel.poo.colorlink.editor.PiecePicker;
 import pt.isel.poo.colorlink.game.model.Grid;
 import pt.isel.poo.colorlink.game.view.PieceView;
 import pt.isel.poo.tile.OnTileTouchListener;
 import pt.isel.poo.tile.TilePanel;
 
 /**
- * Created by Moreira on 17/02/2017.
+ *  Created by Moreira on 17/02/2017.
  */
 
 public class Game extends AppCompatActivity implements OnTileTouchListener {
-
-
-    private PiecePicker piecePicker;        // Piece type selector.
-    private RadioGroup colorSel, actionSel; // Selectors of color and action.
     private TilePanel grid;                 // Edit area.
 
-    public TextView textViewTime;
+    private TextView textViewTime;
     private static final int _1Minute = 60;
-    static long  startTime;
+    private long startTime;
     private long endTime, duration;
     private int minutes, seconds;
+    private boolean startGame;
 
 
     public static Grid modelGame;
 
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main_game);
+
+        // obter referencia para a vista
         grid = (TilePanel) findViewById(R.id.panelGame);
         grid.setListener(this);
-        textViewTime =(TextView) findViewById(R.id.time);
+        // obter a referecia para textview que representa o tempo jogado
+        textViewTime = (TextView) findViewById(R.id.time);
 
+        // Criacao do modelo do jogo
         modelGame = new Grid();
-        init();
-        grid.setSize(modelGame.COL, modelGame.LINE);
-        initGrid();
 
-        startTime = System.nanoTime();
-        timeUpdate();
-        Log.e("Game OnCreate() Line "+modelGame.LINE, " Col "+ modelGame.COL );
+        init();
+        startGame = true;
     }
 
 
-    /** Chama o metodo para ler o ficheriro de Level1 */
+    /** Inicia tudo que eh preciso para inciar o jogo */
     private void init(){
+        initReadFile();
+        grid.setSize(modelGame.COL, modelGame.LINE);
+        initGrid();
+    }
+
+    /** Chama o metodo para ler o ficheriro de Level1 */
+    private void initReadFile(){
         AssetManager assetManager = getAssets();
         try {
             loadLevel("Level1");
@@ -71,17 +75,18 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
     }
 
 
+    /** Inicia a parte visual do jogo */
     private void initGrid(){
         Log.v("Game --> initGrid " , " Begin");
-        for(int i=0; i < modelGame.LINE ; i++) {
-            for (int j = 0; j < modelGame.COL ; j++) {
+        for(int i=0; i < grid.getHeightInTiles() ; i++) {
+            for (int j = 0; j < grid.getWidthInTiles() ; j++) {
                 grid.setTile(j, i, new PieceView(this, i, j));
-//                grid.setTile(j, i, new PieceView(this, i, j, false));
-//                  grid.setTile(j, i, new EmptyPieceView(this, i, j, false));
             }
         }
     }
 
+
+    /** A acede e le  o ficheiro  de nivel do jogo */
     private boolean loadLevel(String filename) throws IOException {
         try{
 //            Scanner level = new Scanner(new FileInputStream(filename+".txt"));
@@ -102,9 +107,11 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
 
 
     /** Exibe o valor do tempo jogado actualizado */
-    public void repaintTime() {
+    private void repaintTime() {
         timePlayed();
-        if(seconds < 10) textViewTime.setText("\t"+minutes+":0"+ seconds);
+        if(seconds < 10){
+            textViewTime.setText("\t"+minutes+":0"+ seconds);
+        }
         else textViewTime.setText("\t"+minutes+":"+ seconds);
     }
 
@@ -135,19 +142,23 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
     }
 
 
+
     @Override
-    public boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException {
-//        Log.e("x "+xTile, " y"+ yTile );
-//        Log.e("Type ", "    "+modelGame.pieces[xTile][yTile].getype());
+    public boolean onClick(int xTile, int yTile)  {
+        if(startGame){startTime = System.nanoTime();   timeUpdate(); startGame = false;} // so vai ser executado uma vez
         grid.setTile(xTile, yTile, new PieceView(this, yTile, xTile, true));
+
+        if(modelGame.isOver()) textViewTime.setText("Wou Win!!!");
         return false;
     }
 
     @Override
     public boolean onDrag(int xFrom, int yFrom, int xTo, int yTo) {
-//        PieceView pv = new PieceView(this, yFrom, xFrom, false);
-//        PieceView pv1 = (PieceView) grid.getTile(xFrom, yFrom);
-//        grid.setTile(xFrom, yFrom, pv1 );
+        modelGame.setPiece( yFrom,  xFrom,  yTo,  xTo);
+
+        PieceView aux = (PieceView) grid.getTile(xTo, yTo);
+        grid.setTile(xTo, yTo, grid.getTile(xFrom, yFrom));
+        grid.setTile(xFrom, yFrom, aux);
         return false;
     }
 
@@ -158,8 +169,6 @@ public class Game extends AppCompatActivity implements OnTileTouchListener {
 
 
     @Override
-    public void onDragCancel() {
-
-    }
+    public void onDragCancel() {}
 
 }

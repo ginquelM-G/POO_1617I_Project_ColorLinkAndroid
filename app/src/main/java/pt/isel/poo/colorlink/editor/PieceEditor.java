@@ -1,7 +1,5 @@
 package pt.isel.poo.colorlink.editor;
 
-import android.graphics.Bitmap;
-
 import pt.isel.poo.colorlink.game.model.Piece;
 
 /**
@@ -13,7 +11,6 @@ public  class PieceEditor {
     private int color;
     private int idxImage;
     private int angle = 0;
-    private Bitmap image;
     private Piece piece;
 
     public PieceEditor(){}
@@ -55,11 +52,4 @@ public  class PieceEditor {
 
     public int getIdxImage() {  return idxImage;    }
 
-    public void setImage(Bitmap image) {
-        this.image = image;
-    }
-
-    public Bitmap getImage() {
-        return image;
-    }
 }

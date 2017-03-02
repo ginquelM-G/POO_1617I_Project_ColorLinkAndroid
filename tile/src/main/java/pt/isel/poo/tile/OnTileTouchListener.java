@@ -12,7 +12,7 @@ public interface OnTileTouchListener {
 	 * @param yTile y coordinate of the tile clicked
 	 * @return true if it has effect
 	 */
-	boolean onClick(int xTile, int yTile) throws IllegalAccessException, InstantiationException;
+	boolean onClick(int xTile, int yTile) ;
 
 	/**
 	 * When a tile is dragged.

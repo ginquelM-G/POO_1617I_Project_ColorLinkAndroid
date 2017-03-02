@@ -8,6 +8,9 @@
     <string name="move">Move</string>
     <string name="delete">Delete</string>
     <string name="fix">Fix</string>
+
+    <string name="nova_grelha">Nova Grelha</string>
+
     <string name="save">Save</string>
     <string name="file_name">File name</string>
     <string name="cancel">Cancel</string>
